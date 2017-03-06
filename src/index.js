@@ -31,6 +31,9 @@ const InputNumber = React.createClass({
     downHandler: PropTypes.node,
     useTouch: PropTypes.bool,
     formatter: PropTypes.func,
+    handler: PropTypes.bool,     // ux
+    addonBefore: PropTypes.node, // ux
+    addonAfter: PropTypes.node,  // ux
   },
 
   mixins: [mixin],
@@ -40,6 +43,7 @@ const InputNumber = React.createClass({
       focusOnUpDown: true,
       useTouch: false,
       prefixCls: 'rc-input-number',
+      handler: false,
     };
   },
 
@@ -106,7 +110,7 @@ const InputNumber = React.createClass({
 
   render() {
     const props = { ...this.props };
-    const { prefixCls, disabled, readOnly, useTouch } = props;
+    const { prefixCls, disabled, readOnly, useTouch, handler } = props;
     const classes = classNames({
       [prefixCls]: true,
       [props.className]: !!props.className,
@@ -169,40 +173,66 @@ const InputNumber = React.createClass({
     }
     const inputDisplayValueFormat = this.formatWrapper(inputDisplayValue);
 
+    // ux group
+    const wrapperClassName = `${props.prefixCls}-group`;
+    const addonClassName = `${wrapperClassName}-addon`;
+    const addonBefore = props.addonBefore ? (
+        <span className={addonClassName}>
+        {props.addonBefore}
+      </span>
+      ) : null;
+
+    const addonAfter = props.addonAfter ? (
+        <span className={addonClassName}>
+        {props.addonAfter}
+      </span>
+      ) : null;
+
+    const wrapClassName = classNames({
+      [`${prefixCls}-input-wrap`]: true,
+      [wrapperClassName]: (addonBefore || addonAfter),
+    });
+    // ux group end
+
     // ref for test
     return (
       <div className={classes} style={props.style}>
-        <div className={`${prefixCls}-handler-wrap`}>
-          <InputHandler
-            ref="up"
-            disabled={!!upDisabledClass || disabled || readOnly}
-            prefixCls={prefixCls}
-            unselectable="unselectable"
-            {...upEvents}
-            className={`${prefixCls}-handler ${prefixCls}-handler-up ${upDisabledClass}`}
-          >
-            {this.props.upHandler || <span
-              unselectable="unselectable"
-              className={`${prefixCls}-handler-up-inner`}
-              onClick={preventDefault}
-            />}
-          </InputHandler>
-          <InputHandler
-            ref="down"
-            disabled={!!downDisabledClass || disabled || readOnly}
-            prefixCls={prefixCls}
-            unselectable="unselectable"
-            {...downEvents}
-            className={`${prefixCls}-handler ${prefixCls}-handler-down ${downDisabledClass}`}
-          >
-            {this.props.downHandler || <span
-              unselectable="unselectable"
-              className={`${prefixCls}-handler-down-inner`}
-              onClick={preventDefault}
-            />}
-          </InputHandler>
-        </div>
-        <div className={`${prefixCls}-input-wrap`}>
+        {
+          handler ? (
+              <div className={`${prefixCls}-handler-wrap`}>
+                <InputHandler
+                  ref="up"
+                  disabled={!!upDisabledClass || disabled || readOnly}
+                  prefixCls={prefixCls}
+                  unselectable="unselectable"
+                  {...upEvents}
+                  className={`${prefixCls}-handler ${prefixCls}-handler-up ${upDisabledClass}`}
+                >
+                  {this.props.upHandler || <span
+                    unselectable="unselectable"
+                    className={`${prefixCls}-handler-up-inner`}
+                    onClick={preventDefault}
+                  />}
+                </InputHandler>
+                <InputHandler
+                  ref="down"
+                  disabled={!!downDisabledClass || disabled || readOnly}
+                  prefixCls={prefixCls}
+                  unselectable="unselectable"
+                  {...downEvents}
+                  className={`${prefixCls}-handler ${prefixCls}-handler-down ${downDisabledClass}`}
+                >
+                  {this.props.downHandler || <span
+                    unselectable="unselectable"
+                    className={`${prefixCls}-handler-down-inner`}
+                    onClick={preventDefault}
+                  />}
+                </InputHandler>
+              </div>
+            ) : null
+        }
+        <div className={wrapClassName}>
+          {addonBefore}
           <input
             type={props.type}
             placeholder={props.placeholder}
@@ -223,6 +253,7 @@ const InputNumber = React.createClass({
             ref="input"
             value={inputDisplayValueFormat}
           />
+          {addonAfter}
         </div>
       </div>
     );
